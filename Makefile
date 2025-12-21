@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test format lint type-check clean build run
+.PHONY: help install install-dev test format lint type-check clean build run release
 
 VENV = .venv/bin
 
@@ -12,6 +12,7 @@ help:
 	@echo "  make type-check   - Run mypy type checking"
 	@echo "  make clean        - Remove build artifacts"
 	@echo "  make build        - Build distribution packages"
+	@echo "  make release      - Build and publish to PyPI (requires VERSION=x.y.z)"
 	@echo "  make run          - Run repostats (use ARGS='owner/repo' to pass arguments)"
 
 install:
@@ -49,6 +50,21 @@ clean:
 
 build:
 	uv build
+
+release: clean build
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make release VERSION=x.y.z"; \
+		exit 1; \
+	fi
+	@echo "Building release $(VERSION)..."
+	$(VENV)/python -m pip install --upgrade twine
+	$(VENV)/python -m twine check dist/*
+	@echo "Ready to publish version $(VERSION) to PyPI"
+	@echo "Continue? [y/N] " && read ans && [ $${ans:-N} = y ]
+	$(VENV)/python -m twine upload dist/*
+	git tag v$(VERSION)
+	git push origin v$(VERSION)
+	@echo "Released version $(VERSION)!"
 
 run:
 	$(VENV)/repostats $(ARGS)
