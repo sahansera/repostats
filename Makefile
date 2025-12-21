@@ -1,5 +1,7 @@
 .PHONY: help install install-dev test format lint type-check clean build run
 
+VENV = .venv/bin
+
 help:
 	@echo "Available commands:"
 	@echo "  make install      - Install package"
@@ -19,21 +21,21 @@ install-dev:
 	uv pip install -e ".[dev]"
 
 test:
-	pytest
+	$(VENV)/pytest
 
 test-cov:
-	pytest --cov=src --cov-report=html --cov-report=term
+	$(VENV)/pytest --cov=src --cov-report=html --cov-report=term
 
 format:
-	black .
-	isort .
+	$(VENV)/black .
+	$(VENV)/isort .
 
 lint:
-	black --check .
-	isort --check .
+	$(VENV)/black --check .
+	$(VENV)/isort --check .
 
 type-check:
-	mypy src
+	$(VENV)/mypy src
 
 clean:
 	rm -rf build/
@@ -49,4 +51,4 @@ build:
 	uv build
 
 run:
-	repostats $(ARGS)
+	$(VENV)/repostats $(ARGS)
