@@ -42,15 +42,41 @@ class GitHubClient:
             error_detail = "GitHub request failed"
             exc_response = getattr(exc, "response", None)
             if exc_response is not None:
+                status_code = exc_response.status_code
                 try:
                     message = exc_response.json().get("message")
                 except ValueError:
                     message = exc_response.text or None
-                status = f"{exc_response.status_code} {exc_response.reason}"
-                if message:
-                    error_detail = f"{status}: {message}"
+                
+                # Special handling for rate limiting
+                if status_code == 403:
+                    rate_limit = exc_response.headers.get("X-RateLimit-Remaining")
+                    if rate_limit == "0":
+                        reset_time = exc_response.headers.get("X-RateLimit-Reset", "")
+                        error_detail = (
+                            "GitHub API rate limit exceeded. "
+                            "Try authenticating with a token: "
+                            "repostats --token YOUR_TOKEN owner/repo"
+                        )
+                        if reset_time:
+                            try:
+                                from datetime import datetime
+                                reset_dt = datetime.fromtimestamp(int(reset_time))
+                                error_detail += f" (resets at {reset_dt.strftime('%H:%M:%S')})"
+                            except (ValueError, OverflowError):
+                                pass
+                    elif message:
+                        error_detail = f"403 Forbidden: {message}"
+                    else:
+                        error_detail = "403 Forbidden"
+                elif status_code == 404:
+                    error_detail = f"Repository '{owner}/{repo}' not found. Check the repository name and your access."
                 else:
-                    error_detail = status or error_detail
+                    status = f"{status_code} {exc_response.reason}"
+                    if message:
+                        error_detail = f"{status}: {message}"
+                    else:
+                        error_detail = status
             raise RuntimeError(error_detail) from exc
 
         try:

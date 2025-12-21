@@ -55,6 +55,7 @@ def test_get_repo_stats_http_error(mock_response):
     error_response = MagicMock()
     error_response.status_code = 404
     error_response.reason = "Not Found"
+    error_response.headers = {}
     error_response.json.return_value = {"message": "Repository not found"}
     http_error = requests.HTTPError(response=error_response)
 
@@ -65,8 +66,9 @@ def test_get_repo_stats_http_error(mock_response):
         with pytest.raises(RuntimeError) as exc:
             client.get_repo_stats("test", "missing")
 
-    assert "404 Not Found" in str(exc.value)
-    assert "Repository not found" in str(exc.value)
+    # Updated assertion to match improved error message
+    assert "not found" in str(exc.value).lower()
+    assert "test/missing" in str(exc.value)
 
 
 def test_get_repo_stats_invalid_json(mock_response):
