@@ -58,17 +58,19 @@ uv venv
 source .venv/bin/activate
 
 # Install in development mode
-uv pip install -e ".[dev]"
+make install-dev
 
 # Run tests
-pytest
+make test
 
 # Format code
-black .
-isort .
+make format
 
 # Type checking
-mypy src
+make type-check
+
+# See all available commands
+make help
 ```
 
 ## License
