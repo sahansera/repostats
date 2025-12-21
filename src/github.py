@@ -87,6 +87,9 @@ class GitHubClient:
         except ValueError as exc:
             raise RuntimeError("GitHub returned invalid JSON") from exc
 
+        # Get latest release info
+        latest_release = self._get_latest_release(owner, repo)
+
         return {
             "name": data.get("full_name", f"{owner}/{repo}"),
             "stars": data.get("stargazers_count", 0),
@@ -96,4 +99,34 @@ class GitHubClient:
             "created_at": data.get("created_at", "Unknown"),
             "updated_at": data.get("updated_at", "Unknown"),
             "language": data.get("language") or "Unknown",
+            "license": data.get("license", {}).get("spdx_id") or "Unknown",
+            "size": data.get("size", 0),  # Size in KB
+            "default_branch": data.get("default_branch", "Unknown"),
+            "open_pull_requests": data.get("open_issues_count", 0)
+            - data.get("open_issues", 0),  # Approximation
+            "latest_release": latest_release,
         }
+
+    def _get_latest_release(self, owner: str, repo: str) -> Union[str, None]:
+        """Get the latest release tag name.
+
+        Args:
+            owner: Repository owner
+            repo: Repository name
+
+        Returns:
+            Latest release tag name or None if no releases
+        """
+        url = f"{self.base_url}/repos/{owner}/{repo}/releases/latest"
+        try:
+            response = requests.get(url, headers=self.headers, timeout=self.timeout)
+            if response.status_code == 404:
+                # No releases found
+                return None
+            response.raise_for_status()
+            data = response.json()
+            tag_name = data.get("tag_name")
+            return tag_name if tag_name else None
+        except requests.RequestException:
+            # If release fetch fails, don't fail the whole request
+            return None

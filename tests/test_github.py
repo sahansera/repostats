@@ -25,15 +25,22 @@ def mock_response():
 
 
 def test_get_repo_stats(mock_response):
-    with patch("requests.get", return_value=mock_response) as mock_get:
+    # Mock for latest release endpoint (returns 404 - no releases)
+    release_mock = MagicMock()
+    release_mock.status_code = 404
+    
+    with patch("requests.get", side_effect=[mock_response, release_mock]) as mock_get:
         client = GitHubClient()
         stats = client.get_repo_stats("test", "repo")
 
-        mock_get.assert_called_once()
-        _, kwargs = mock_get.call_args
-        assert kwargs["timeout"] == 10
-        assert kwargs["headers"]["User-Agent"] == f"repostats/{__version__}"
-        assert kwargs["headers"]["Accept"] == "application/vnd.github+json"
+        # Should be called twice: once for repo, once for latest release
+        assert mock_get.call_count == 2
+        
+        # Check first call (repo stats)
+        first_call_args = mock_get.call_args_list[0]
+        assert first_call_args[1]["timeout"] == 10
+        assert first_call_args[1]["headers"]["User-Agent"] == f"repostats/{__version__}"
+        assert first_call_args[1]["headers"]["Accept"] == "application/vnd.github+json"
         assert stats["name"] == "test/repo"
         assert stats["stars"] == 100
         assert stats["forks"] == 50
