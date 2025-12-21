@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-12-21
+
+### Added
+- Support for multiple repositories in a single command
+- `--output` / `-o` flag to save results to a file
+- Additional repository metrics: license, size, default branch, open PRs, latest release
+- `make check` command that automatically formats code before running checks
+- Comprehensive error messages for rate limits with reset time
+- Specific error message for 404 (repository not found)
+- README badges for PyPI, tests, Python version, and license
+- CONTRIBUTING.md with complete development guidelines
+
+### Changed
+- CLI now accepts multiple repository arguments
+- Text output conditionally displays fields based on availability
+- Repository size automatically converted to MB when appropriate
+- Improved test coverage with new test cases for multi-repo and file output
+
+### Fixed
+- Code formatting issues in CI
+- Type checking errors with mypy
+- Import order with isort
+
 ## [1.1.0] - 2025-12-21
 
 ### Added
@@ -35,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User-Agent header with version tracking
 - Development tooling: pytest suite, black/isort formatting, mypy type checking
 
-[Unreleased]: https://github.com/sahansera/repostats/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/sahansera/repostats/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/sahansera/repostats/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/sahansera/repostats/compare/v0.1.0...v1.1.0
 [0.1.0]: https://github.com/sahansera/repostats/releases/tag/v0.1.0
