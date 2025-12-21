@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test format lint type-check clean build run release
+.PHONY: help install install-dev test format lint type-check clean build run release check
 
 VENV = .venv/bin
 
@@ -10,6 +10,7 @@ help:
 	@echo "  make format       - Format code with black and isort"
 	@echo "  make lint         - Run linters"
 	@echo "  make type-check   - Run mypy type checking"
+	@echo "  make check        - Format code, then run all checks (lint + type-check + test)"
 	@echo "  make clean        - Remove build artifacts"
 	@echo "  make build        - Build distribution packages"
 	@echo "  make release      - Build and publish to PyPI (requires VERSION=x.y.z)"
@@ -37,6 +38,9 @@ lint:
 
 type-check:
 	$(VENV)/mypy src
+
+check: format lint type-check test
+	@echo "✅ All checks passed!"
 
 clean:
 	rm -rf build/

@@ -47,7 +47,7 @@ class GitHubClient:
                     message = exc_response.json().get("message")
                 except ValueError:
                     message = exc_response.text or None
-                
+
                 # Special handling for rate limiting
                 if status_code == 403:
                     rate_limit = exc_response.headers.get("X-RateLimit-Remaining")
@@ -61,8 +61,11 @@ class GitHubClient:
                         if reset_time:
                             try:
                                 from datetime import datetime
+
                                 reset_dt = datetime.fromtimestamp(int(reset_time))
-                                error_detail += f" (resets at {reset_dt.strftime('%H:%M:%S')})"
+                                error_detail += (
+                                    f" (resets at {reset_dt.strftime('%H:%M:%S')})"
+                                )
                             except (ValueError, OverflowError):
                                 pass
                     elif message:
