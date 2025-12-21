@@ -28,14 +28,14 @@ def test_get_repo_stats(mock_response):
     # Mock for latest release endpoint (returns 404 - no releases)
     release_mock = MagicMock()
     release_mock.status_code = 404
-    
+
     with patch("requests.get", side_effect=[mock_response, release_mock]) as mock_get:
         client = GitHubClient()
         stats = client.get_repo_stats("test", "repo")
 
         # Should be called twice: once for repo, once for latest release
         assert mock_get.call_count == 2
-        
+
         # Check first call (repo stats)
         first_call_args = mock_get.call_args_list[0]
         assert first_call_args[1]["timeout"] == 10
