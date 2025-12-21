@@ -2,7 +2,7 @@ from typing import Dict, Union
 
 import requests
 
-from . import __version__
+from __init__ import __version__
 
 
 class GitHubClient:
@@ -18,7 +18,7 @@ class GitHubClient:
         self.base_url: str = "https://api.github.com"
         self.headers: Dict[str, str] = {
             "Accept": "application/vnd.github+json",
-            "User-Agent": f"githubstats/{__version__}",
+            "User-Agent": f"repostats/{__version__}",
         }
         if token:
             self.headers["Authorization"] = f"token {token}"

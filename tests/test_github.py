@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from githubstats.github import GitHubClient
-from githubstats import __version__
+from github import GitHubClient
+from __init__ import __version__
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def test_get_repo_stats(mock_response):
         mock_get.assert_called_once()
         _, kwargs = mock_get.call_args
         assert kwargs["timeout"] == 10
-        assert kwargs["headers"]["User-Agent"] == f"githubstats/{__version__}"
+        assert kwargs["headers"]["User-Agent"] == f"repostats/{__version__}"
         assert kwargs["headers"]["Accept"] == "application/vnd.github+json"
         assert stats["name"] == "test/repo"
         assert stats["stars"] == 100
@@ -48,7 +48,7 @@ def test_github_client_with_token():
 def test_github_client_without_token():
     client = GitHubClient()
     assert "Authorization" not in client.headers
-    assert client.headers["User-Agent"] == f"githubstats/{__version__}"
+    assert client.headers["User-Agent"] == f"repostats/{__version__}"
 
 
 def test_get_repo_stats_http_error(mock_response):

@@ -69,10 +69,10 @@ isort .
 
 # Type checking
 mypy src
+
+# Note: Once you rename the GitHub repo to 'repostats', update the clone URL above
 ```
 
 ## License
 
 MIT
-
-> Much of the code was written by Claude 4 LLM. The code is provided under the MIT License, allowing for free use, modification, and distribution.

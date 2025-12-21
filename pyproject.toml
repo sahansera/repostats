@@ -45,11 +45,11 @@ dev = [
 ]
 
 [project.scripts]
-repostats = "githubstats.cli:main"
+repostats = "cli:main"
 
 [tool.setuptools]
+py-modules = ["__init__", "cli", "github"]
 package-dir = {"" = "src"}
-packages = ["githubstats"]
 
 [tool.black]
 line-length = 88

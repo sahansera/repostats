@@ -3,7 +3,7 @@ from typing import Dict, Iterable, Tuple, Union
 
 import click
 
-from .github import GitHubClient
+from github import GitHubClient
 
 
 def format_text_rows(stats: Dict[str, Union[str, int]]) -> Iterable[Tuple[str, str]]:

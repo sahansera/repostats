@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from githubstats.cli import main
+from cli import main
 
 
 def test_cli_success():
@@ -22,7 +22,7 @@ def test_cli_success():
         "updated_at": "2022-02-01T00:00:00Z",
     }
 
-    with patch("githubstats.cli.GitHubClient") as mock_client:
+    with patch("cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = mock_stats
         mock_client.return_value = mock_instance
@@ -60,7 +60,7 @@ def test_cli_with_token():
         "updated_at": "2022-02-01T00:00:00Z",
     }
 
-    with patch("githubstats.cli.GitHubClient") as mock_client:
+    with patch("cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = mock_stats
         mock_client.return_value = mock_instance
@@ -75,7 +75,7 @@ def test_cli_api_error():
     """Test CLI when GitHub API returns an error"""
     runner = CliRunner()
 
-    with patch("githubstats.cli.GitHubClient") as mock_client:
+    with patch("cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.side_effect = Exception("API Error")
         mock_client.return_value = mock_instance
@@ -101,7 +101,7 @@ def test_cli_json_output():
         "updated_at": "2022-02-01T00:00:00Z",
     }
 
-    with patch("githubstats.cli.GitHubClient") as mock_client:
+    with patch("cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = mock_stats
         mock_client.return_value = mock_instance
@@ -128,7 +128,7 @@ def test_cli_yaml_output():
         "updated_at": "2022-02-01T00:00:00Z",
     }
 
-    with patch("githubstats.cli.GitHubClient") as mock_client:
+    with patch("cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = mock_stats
         mock_client.return_value = mock_instance
