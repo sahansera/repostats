@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from github import GitHubClient
 from __init__ import __version__
+from github import GitHubClient
 
 
 @pytest.fixture
