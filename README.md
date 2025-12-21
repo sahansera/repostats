@@ -69,8 +69,6 @@ isort .
 
 # Type checking
 mypy src
-
-# Note: Once you rename the GitHub repo to 'repostats', update the clone URL above
 ```
 
 ## License
