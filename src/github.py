@@ -40,13 +40,13 @@ class GitHubClient:
             response.raise_for_status()
         except requests.RequestException as exc:
             error_detail = "GitHub request failed"
-            response = getattr(exc, "response", None)
-            if response is not None:
+            exc_response = getattr(exc, "response", None)
+            if exc_response is not None:
                 try:
-                    message = response.json().get("message")
+                    message = exc_response.json().get("message")
                 except ValueError:
-                    message = response.text or None
-                status = f"{response.status_code} {response.reason}"
+                    message = exc_response.text or None
+                status = f"{exc_response.status_code} {exc_response.reason}"
                 if message:
                     error_detail = f"{status}: {message}"
                 else:

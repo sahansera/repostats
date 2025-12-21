@@ -6,16 +6,16 @@ import click
 from github import GitHubClient
 
 
-def format_text_rows(stats: Dict[str, Union[str, int]]) -> Iterable[Tuple[str, str]]:
+def format_text_rows(stats: Dict[str, Union[str, int]]) -> Tuple[Tuple[str, str], ...]:
     """Produce label/value rows for text output."""
     return (
         ("Stars", f"{stats['stars']:,}"),
         ("Forks", f"{stats['forks']:,}"),
         ("Open issues", f"{stats['open_issues']:,}"),
         ("Watchers", f"{stats['watchers']:,}"),
-        ("Language", stats["language"] or "Unknown"),
-        ("Created", stats["created_at"]),
-        ("Updated", stats["updated_at"]),
+        ("Language", str(stats["language"] or "Unknown")),
+        ("Created", str(stats["created_at"])),
+        ("Updated", str(stats["updated_at"])),
     )
 
 
