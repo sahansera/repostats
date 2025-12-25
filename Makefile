@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test format lint type-check clean build run release check
+.PHONY: help install install-dev test format lint type-check clean build run release check ci
 
 VENV = .venv/bin
 
@@ -8,9 +8,10 @@ help:
 	@echo "  make install-dev  - Install package with dev dependencies"
 	@echo "  make test         - Run tests"
 	@echo "  make format       - Format code with black and isort"
-	@echo "  make lint         - Run linters"
+	@echo "  make lint         - Run linters (check formatting without changing)"
 	@echo "  make type-check   - Run mypy type checking"
 	@echo "  make check        - Format code, then run all checks (lint + type-check + test)"
+	@echo "  make ci           - Run CI checks locally (lint + type-check + test, no formatting)"
 	@echo "  make clean        - Remove build artifacts"
 	@echo "  make build        - Build distribution packages"
 	@echo "  make release      - Build and publish to PyPI (requires VERSION=x.y.z)"
@@ -41,6 +42,9 @@ type-check:
 
 check: format lint type-check test
 	@echo "✅ All checks passed!"
+
+ci: lint type-check test
+	@echo "✅ CI checks passed! Safe to push."
 
 clean:
 	rm -rf build/
