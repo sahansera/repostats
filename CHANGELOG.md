@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-12-25
+
+### Added
+- Terminal User Interface (TUI) for interactive repository exploration
+- `repostats-tui` command for launching the TUI
+- Optional `[tui]` installation extra for TUI dependencies (textual framework)
+- Rich formatting with colors and organized sections in TUI
+- Keyboard shortcuts in TUI (r: refresh, q: quit)
+- Real-time repository input validation in TUI
+- Auto-fetch stats when TUI launched with repository argument
+
+### Changed
+- Restructured as a dual-interface tool (CLI + TUI)
+- Core `GitHubClient` remains library-friendly for reuse
+- Updated README with TUI installation and usage examples
+- Enhanced feature list to highlight both interfaces
+
 ## [1.2.0] - 2025-12-21
 
 ### Added
