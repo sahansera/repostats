@@ -29,12 +29,10 @@ dependencies = [
     "PyYAML>=6.0.1",
 ]
 
-[project.urls]
-Homepage = "https://github.com/sahansera/repostats"
-Repository = "https://github.com/sahansera/repostats"
-Issues = "https://github.com/sahansera/repostats/issues"
-
 [project.optional-dependencies]
+tui = [
+    "textual>=0.47.0",
+]
 dev = [
     "pytest>=7.3.1",
     "pytest-cov>=4.1.0",
@@ -45,11 +43,17 @@ dev = [
     "types-PyYAML>=6.0.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/sahansera/repostats"
+Repository = "https://github.com/sahansera/repostats"
+Issues = "https://github.com/sahansera/repostats/issues"
+
 [project.scripts]
 repostats = "cli:main"
+repostats-tui = "tui:main"
 
 [tool.setuptools]
-py-modules = ["__init__", "cli", "github"]
+py-modules = ["__init__", "cli", "github", "tui"]
 package-dir = {"" = "src"}
 
 [tool.black]

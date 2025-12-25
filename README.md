@@ -10,10 +10,16 @@ A CLI tool to fetch GitHub repository statistics.
 ## Installation
 
 ```bash
+# Basic installation
 pip install repostats
+
+# With TUI support
+pip install repostats[tui]
 ```
 
 ## Usage
+
+### Command Line Interface (CLI)
 
 ```bash
 # Basic usage - single repository
@@ -41,6 +47,24 @@ repostats python/cpython --format json --output stats.json
 # Multiple repos with JSON output to file
 repostats python/cpython golang/go --format json -o repos.json
 ```
+
+### Terminal User Interface (TUI)
+
+For an interactive experience, use the TUI:
+
+```bash
+# Launch TUI (requires installation with [tui] extra)
+repostats-tui
+
+# Launch TUI with a pre-filled repository
+repostats-tui python/cpython
+```
+
+The TUI provides:
+- **Interactive repository input** with real-time validation
+- **Rich formatting** with colors and organized sections
+- **Keyboard shortcuts**: Press `r` to refresh, `q` to quit
+- **GitHub token support** via `GITHUB_TOKEN` environment variable
 
 ### Example output
 
@@ -91,14 +115,16 @@ The command exits with code `1` when the GitHub API request fails (for example, 
 
 ## Features
 
-- **Multiple repositories**: Fetch stats for multiple repos in a single command
+- **Two interfaces**: Command-line tool and interactive TUI
+- **Multiple repositories**: Fetch stats for multiple repos in a single command (CLI)
 - **Rich metrics**: Stars, forks, issues, watchers, language, license, size, latest release, and more
-- **Multiple output formats**: text (default), JSON, and YAML
-- **File output**: Save results to a file with `--output`
+- **Multiple output formats**: text (default), JSON, and YAML (CLI)
+- **File output**: Save results to a file with `--output` (CLI)
+- **Interactive exploration**: Navigate and refresh stats in real-time (TUI)
 - **GitHub token support**: Authenticate to increase rate limits
 - **Clean output**: Accessible formatting for all output types
 - **Helpful error messages**: Clear guidance on rate limits and missing repos
-- **Exit codes**: Non-zero exit on failure for scripting integration
+- **Exit codes**: Non-zero exit on failure for scripting integration (CLI)
 - **Cross-platform**: Works on macOS, Linux, and Windows
 
 ## Development
@@ -112,8 +138,8 @@ cd repostats
 uv venv
 source .venv/bin/activate
 
-# Install in development mode
-make install-dev
+# Install in development mode (with TUI support)
+uv pip install -e ".[dev,tui]"
 
 # Run tests
 make test
