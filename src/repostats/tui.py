@@ -1,15 +1,12 @@
 """Terminal User Interface for repostats using Textual."""
 
-import os
-import sys
 from typing import Any, Dict, Union
 
+import click
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
 from textual.widgets import Button, Footer, Header, Input, Label, Static
-
-from github import GitHubClient
 
 
 class RepoStats(Static):
@@ -38,12 +35,23 @@ class RepoStats(Static):
 
             # Create client and fetch stats synchronously in a worker thread
             def fetch_stats() -> Dict[str, Any]:
+                from repostats.github import GitHubClient
+
                 client = GitHubClient(token=token)
                 return client.get_repo_stats(owner, repo)  # type: ignore[no-any-return]
 
             worker = self.run_worker(fetch_stats, thread=True)
             stats = await worker.wait()
             self.stats_data = stats
+
+            # Format size consistently: MB if >= 1024 KB, else KB
+            size_kb = stats.get("size", 0)
+            if isinstance(size_kb, int) and size_kb >= 1024:
+                size_str = f"{size_kb / 1024:.1f} MB"
+            elif isinstance(size_kb, int) and size_kb > 0:
+                size_str = f"{size_kb} KB"
+            else:
+                size_str = "0 KB"
 
             # Format the stats nicely
             content = f"""
@@ -54,7 +62,6 @@ class RepoStats(Static):
 [yellow]🔱 Forks:[/yellow]           {stats['forks']:,}
 [yellow]📝 Open Issues:[/yellow]     {stats['open_issues']:,}
 [yellow]👀 Watchers:[/yellow]        {stats['watchers']:,}
-[yellow]🔀 Open PRs:[/yellow]        {stats['open_pull_requests']:,}
 
 [bold cyan]Repository Details[/bold cyan]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -62,7 +69,7 @@ class RepoStats(Static):
 [yellow]Language:[/yellow]          {stats['language']}
 [yellow]License:[/yellow]           {stats['license']}
 [yellow]Default Branch:[/yellow]    {stats['default_branch']}
-[yellow]Size:[/yellow]              {stats['size'] / 1024:.2f} MB
+[yellow]Size:[/yellow]              {size_str}
 [yellow]Latest Release:[/yellow]    {stats['latest_release'] or 'None'}
 
 [bold cyan]Timestamps[/bold cyan]
@@ -125,10 +132,14 @@ class RepoStatsApp(App):
         ("r", "refresh", "Refresh"),
     ]
 
-    def __init__(self, initial_repo: Union[str, None] = None):
+    def __init__(
+        self,
+        initial_repo: Union[str, None] = None,
+        token: Union[str, None] = None,
+    ):
         super().__init__()
         self.initial_repo = initial_repo
-        self.token = os.environ.get("GITHUB_TOKEN")
+        self.token = token
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
@@ -196,10 +207,19 @@ class RepoStatsApp(App):
             self.run_worker(self.fetch_stats())
 
 
-def main() -> None:
-    """Run the TUI application."""
-    initial_repo = sys.argv[1] if len(sys.argv) > 1 else None
-    app = RepoStatsApp(initial_repo=initial_repo)
+@click.command()
+@click.argument("repo", required=False)
+@click.option("--token", help="GitHub API token", envvar="GITHUB_TOKEN")
+def main(repo: Union[str, None] = None, token: Union[str, None] = None) -> None:
+    """Launch the repostats Terminal User Interface.
+
+    Optionally pass a REPO in the format 'owner/repo' to pre-populate the input.
+
+    Example:
+
+        repostats-tui python/cpython
+    """
+    app = RepoStatsApp(initial_repo=repo, token=token)
     app.run()
 
 

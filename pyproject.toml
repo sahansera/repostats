@@ -7,7 +7,7 @@ name = "repostats"
 version = "1.3.0"
 description = "A CLI tool to fetch GitHub repository statistics"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Sahan Serasinghe", email = "sahansera@users.noreply.github.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.8"
@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Build Tools",
 ]
 dependencies = [
@@ -50,12 +51,11 @@ Repository = "https://github.com/sahansera/repostats"
 Issues = "https://github.com/sahansera/repostats/issues"
 
 [project.scripts]
-repostats = "cli:main"
-repostats-tui = "tui:main"
+repostats = "repostats.cli:main"
+repostats-tui = "repostats.tui:main"
 
-[tool.setuptools]
-py-modules = ["__init__", "cli", "github", "tui"]
-package-dir = {"" = "src"}
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
 line-length = 88
@@ -64,6 +64,6 @@ line-length = 88
 profile = "black"
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 disable_error_code = ["import-untyped"]

@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from __init__ import __version__
-from github import GitHubClient
+from repostats import __version__
+from repostats.github import GitHubClient
 
 
 @pytest.fixture
@@ -44,12 +44,15 @@ def test_get_repo_stats(mock_response):
         assert stats["name"] == "test/repo"
         assert stats["stars"] == 100
         assert stats["forks"] == 50
+        # open_pull_requests field removed; open_issues holds actual open issue count
+        assert stats["open_issues"] == 10
+        assert "open_pull_requests" not in stats
 
 
 def test_github_client_with_token():
     client = GitHubClient("test_token")
     assert "Authorization" in client.headers
-    assert client.headers["Authorization"] == "token test_token"
+    assert client.headers["Authorization"] == "******"
 
 
 def test_github_client_without_token():
@@ -73,7 +76,6 @@ def test_get_repo_stats_http_error(mock_response):
         with pytest.raises(RuntimeError) as exc:
             client.get_repo_stats("test", "missing")
 
-    # Updated assertion to match improved error message
     assert "not found" in str(exc.value).lower()
     assert "test/missing" in str(exc.value)
 
@@ -87,3 +89,88 @@ def test_get_repo_stats_invalid_json(mock_response):
             client.get_repo_stats("test", "repo")
 
     assert "invalid JSON" in str(exc.value)
+
+
+def test_get_repo_stats_rate_limit(mock_response):
+    """Test that a 403 with X-RateLimit-Remaining: 0 produces a helpful message."""
+    error_response = MagicMock()
+    error_response.status_code = 403
+    error_response.reason = "Forbidden"
+    error_response.headers = {
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": "9999999999",
+    }
+    error_response.json.return_value = {"message": "API rate limit exceeded"}
+    http_error = requests.HTTPError(response=error_response)
+
+    mock_response.raise_for_status.side_effect = http_error
+
+    with patch("requests.get", return_value=mock_response):
+        client = GitHubClient()
+        with pytest.raises(RuntimeError) as exc:
+            client.get_repo_stats("test", "repo")
+
+    assert "rate limit" in str(exc.value).lower()
+    assert "--token" in str(exc.value)
+    assert "UTC" in str(exc.value)
+
+
+def test_get_repo_stats_403_forbidden(mock_response):
+    """Test that a 403 without rate-limit headers shows the API message."""
+    error_response = MagicMock()
+    error_response.status_code = 403
+    error_response.reason = "Forbidden"
+    error_response.headers = {}
+    error_response.json.return_value = {"message": "Must have push access"}
+    http_error = requests.HTTPError(response=error_response)
+
+    mock_response.raise_for_status.side_effect = http_error
+
+    with patch("requests.get", return_value=mock_response):
+        client = GitHubClient()
+        with pytest.raises(RuntimeError) as exc:
+            client.get_repo_stats("test", "private-repo")
+
+    assert "403 Forbidden" in str(exc.value)
+    assert "Must have push access" in str(exc.value)
+
+
+def test_get_latest_release_success(mock_response):
+    """Test _get_latest_release returns the tag name on success."""
+    release_mock = MagicMock()
+    release_mock.status_code = 200
+    release_mock.raise_for_status.return_value = None
+    release_mock.json.return_value = {"tag_name": "v2.0.0"}
+
+    with patch("requests.get", side_effect=[mock_response, release_mock]):
+        client = GitHubClient()
+        stats = client.get_repo_stats("test", "repo")
+
+    assert stats["latest_release"] == "v2.0.0"
+
+
+def test_get_latest_release_none_when_no_releases(mock_response):
+    """Test _get_latest_release returns None when no releases exist (404)."""
+    release_mock = MagicMock()
+    release_mock.status_code = 404
+
+    with patch("requests.get", side_effect=[mock_response, release_mock]):
+        client = GitHubClient()
+        stats = client.get_repo_stats("test", "repo")
+
+    assert stats["latest_release"] is None
+
+
+def test_get_latest_release_none_on_error(mock_response):
+    """Test _get_latest_release returns None when the release request fails."""
+    release_mock = MagicMock()
+    release_mock.status_code = 500
+    release_mock.raise_for_status.side_effect = requests.RequestException(
+        "server error"
+    )
+
+    with patch("requests.get", side_effect=[mock_response, release_mock]):
+        client = GitHubClient()
+        stats = client.get_repo_stats("test", "repo")
+
+    assert stats["latest_release"] is None
