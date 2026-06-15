@@ -52,7 +52,7 @@ def test_get_repo_stats(mock_response):
 def test_github_client_with_token():
     client = GitHubClient("test_token")
     assert "Authorization" in client.headers
-    assert client.headers["Authorization"] == "******"
+    assert client.headers["Authorization"] == "Bearer " + "test_token"
 
 
 def test_github_client_without_token():

@@ -22,7 +22,7 @@ class GitHubClient:
             "User-Agent": f"repostats/{__version__}",
         }
         if token:
-            self.headers["Authorization"] = f"******"
+            self.headers["Authorization"] = "Bearer " + token
         self.timeout = timeout
 
     def get_repo_stats(self, owner: str, repo: str) -> Dict[str, Union[str, int]]:
