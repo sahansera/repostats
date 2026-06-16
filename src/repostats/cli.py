@@ -8,7 +8,7 @@ from repostats.github import GitHubClient
 
 
 def format_text_rows(
-    stats: Dict[str, Union[str, int, None]]
+    stats: Dict[str, Union[str, int, None]],
 ) -> Tuple[Tuple[str, str], ...]:
     """Produce label/value rows for text output."""
     rows = [
