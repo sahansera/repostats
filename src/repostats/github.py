@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 from typing import Dict, Union
 
 import requests
 
-from __init__ import __version__
+from repostats import __version__
 
 
 class GitHubClient:
@@ -21,10 +22,10 @@ class GitHubClient:
             "User-Agent": f"repostats/{__version__}",
         }
         if token:
-            self.headers["Authorization"] = f"token {token}"
+            self.headers["Authorization"] = "Bearer " + token
         self.timeout = timeout
 
-    def get_repo_stats(self, owner: str, repo: str) -> Dict[str, Union[str, int]]:
+    def get_repo_stats(self, owner: str, repo: str) -> Dict[str, Union[str, int, None]]:
         """Get basic statistics for a repository.
 
         Args:
@@ -60,11 +61,11 @@ class GitHubClient:
                         )
                         if reset_time:
                             try:
-                                from datetime import datetime
-
-                                reset_dt = datetime.fromtimestamp(int(reset_time))
+                                reset_dt = datetime.fromtimestamp(
+                                    int(reset_time), tz=timezone.utc
+                                )
                                 error_detail += (
-                                    f" (resets at {reset_dt.strftime('%H:%M:%S')})"
+                                    f" (resets at {reset_dt.strftime('%H:%M:%S UTC')})"
                                 )
                             except (ValueError, OverflowError):
                                 pass
@@ -102,8 +103,6 @@ class GitHubClient:
             "license": data.get("license", {}).get("spdx_id") or "Unknown",
             "size": data.get("size", 0),  # Size in KB
             "default_branch": data.get("default_branch", "Unknown"),
-            "open_pull_requests": data.get("open_issues_count", 0)
-            - data.get("open_issues", 0),  # Approximation
             "latest_release": latest_release,
         }
 

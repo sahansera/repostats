@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from cli import main
+from repostats.cli import main
 
 
 def get_mock_stats(name="test/repo"):
@@ -22,7 +22,6 @@ def get_mock_stats(name="test/repo"):
         "license": "MIT",
         "size": 1024,
         "default_branch": "main",
-        "open_pull_requests": 5,
         "latest_release": "v1.0.0",
     }
 
@@ -31,7 +30,7 @@ def test_cli_success():
     """Test successful CLI execution"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = get_mock_stats()
         mock_client.return_value = mock_instance
@@ -40,8 +39,10 @@ def test_cli_success():
 
         assert result.exit_code == 0
         assert "test/repo statistics" in result.output
-        assert "Stars       : 100" in result.output
-        assert "Forks       : 50" in result.output
+        assert "Stars" in result.output
+        assert "100" in result.output
+        assert "Forks" in result.output
+        assert "50" in result.output
 
 
 def test_cli_invalid_repo_format():
@@ -58,7 +59,7 @@ def test_cli_with_token():
     """Test CLI with token parameter"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = get_mock_stats()
         mock_client.return_value = mock_instance
@@ -73,7 +74,7 @@ def test_cli_api_error():
     """Test CLI when GitHub API returns an error"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.side_effect = Exception("API Error")
         mock_client.return_value = mock_instance
@@ -88,7 +89,7 @@ def test_cli_json_output():
     """Test CLI JSON output format"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = get_mock_stats()
         mock_client.return_value = mock_instance
@@ -104,7 +105,7 @@ def test_cli_yaml_output():
     """Test CLI YAML output format"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = get_mock_stats()
         mock_client.return_value = mock_instance
@@ -120,7 +121,7 @@ def test_cli_multiple_repos():
     """Test CLI with multiple repositories"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.side_effect = [
             get_mock_stats("test/repo1"),
@@ -139,7 +140,7 @@ def test_cli_output_file():
     """Test CLI with output file"""
     runner = CliRunner()
 
-    with patch("cli.GitHubClient") as mock_client:
+    with patch("repostats.cli.GitHubClient") as mock_client:
         mock_instance = MagicMock()
         mock_instance.get_repo_stats.return_value = get_mock_stats()
         mock_client.return_value = mock_instance
@@ -163,3 +164,28 @@ def test_cli_output_file():
         finally:
             if os.path.exists(temp_path):
                 os.unlink(temp_path)
+
+
+def test_cli_text_label_alignment():
+    """Test that text output labels are aligned based on the longest label."""
+    runner = CliRunner()
+
+    with patch("repostats.cli.GitHubClient") as mock_client:
+        mock_instance = MagicMock()
+        mock_instance.get_repo_stats.return_value = get_mock_stats()
+        mock_client.return_value = mock_instance
+
+        result = runner.invoke(main, ["test/repo"])
+
+        assert result.exit_code == 0
+        # "Default branch" is the longest label (14 chars); every label+colon
+        # line should contain ': ' with consistent spacing.
+        lines = [
+            l for l in result.output.splitlines() if ": " in l and not l.startswith("-")
+        ]
+        assert lines, "Expected at least one label: value line"
+        # All colon positions should be the same
+        colon_positions = [l.index(":") for l in lines]
+        assert (
+            len(set(colon_positions)) == 1
+        ), f"Misaligned labels — colon positions: {colon_positions}"
