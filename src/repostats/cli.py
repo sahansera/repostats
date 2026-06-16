@@ -7,7 +7,9 @@ import yaml
 from repostats.github import GitHubClient
 
 
-def format_text_rows(stats: Dict[str, Union[str, int]]) -> Tuple[Tuple[str, str], ...]:
+def format_text_rows(
+    stats: Dict[str, Union[str, int, None]]
+) -> Tuple[Tuple[str, str], ...]:
     """Produce label/value rows for text output."""
     rows = [
         ("Stars", f"{stats['stars']:,}"),
@@ -48,7 +50,7 @@ def format_text_rows(stats: Dict[str, Union[str, int]]) -> Tuple[Tuple[str, str]
     return tuple(rows)
 
 
-def format_output(stats: Dict[str, Union[str, int]], output_format: str) -> str:
+def format_output(stats: Dict[str, Union[str, int, None]], output_format: str) -> str:
     """Format repository statistics based on output format."""
     normalized_format = output_format.lower()
 
@@ -105,7 +107,7 @@ def main(
         repostats python/cpython --format json --output stats.json
     """
     client = GitHubClient(token)
-    results: List[Dict[str, Union[str, int]]] = []
+    results: List[Dict[str, Union[str, int, None]]] = []
     errors: List[str] = []
 
     for repo in repos:

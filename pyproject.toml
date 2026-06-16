@@ -11,7 +11,7 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+license = {text = "MIT"}
 keywords = ["github", "statistics", "cli", "api"]
 classifiers = [
     "Development Status :: 3 - Alpha",

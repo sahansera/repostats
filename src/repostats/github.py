@@ -25,7 +25,7 @@ class GitHubClient:
             self.headers["Authorization"] = "Bearer " + token
         self.timeout = timeout
 
-    def get_repo_stats(self, owner: str, repo: str) -> Dict[str, Union[str, int]]:
+    def get_repo_stats(self, owner: str, repo: str) -> Dict[str, Union[str, int, None]]:
         """Get basic statistics for a repository.
 
         Args:
